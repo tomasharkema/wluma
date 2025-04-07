@@ -33,11 +33,18 @@ impl Als {
             .and_then(|dir| {
                 dir.filter_map(|e| e.ok())
                     .find(|e| {
-                        ["als", "acpi-als", "apds9960"].contains(
-                            &fs::read_to_string(e.path().join("name"))
-                                .unwrap_or_default()
-                                .trim(),
-                        )
+                        let path = e.path();
+
+                        log::info!("Considering {:?}", path);
+
+                        let name_path = path.join("name");
+                        let name_raw = fs::read_to_string(name_path).unwrap_or_default();
+                        let detected_name = name_raw.trim();
+
+                        log::info!("Detected device name: {}", detected_name);
+
+                        ["als", "acpi-als", "apds9960", "al3320a", "bh1750"]
+                            .contains(&detected_name)
                     })
                     .and_then(|e| {
                         // TODO should probably start from the `parse_illuminance_input` in the next major version
